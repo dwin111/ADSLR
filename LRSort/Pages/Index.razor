@@ -1,10 +1,183 @@
 ﻿@page "/"
+@using SelectionSort
+@using LRSort.Models
 
 <PageTitle>Index</PageTitle>
+<div>
+    <div class="flex_left" style="width: 50%;">
+        <div>
+            <input type="text" @bind="@ArrayString" />
+            <button @onclick="(async () => await Chache())">Sort</button>
+            <p>Time sort (Microseconds): @ExTime.Microseconds</p>
+        </div>
+        <div>
+            <h2>Step</h2>
+            @if (sortResponce != null && sortResponce.ArrayStep.Count() > 0 )
+            {
+                @for (int i = 0; i < sortResponce.ArrayStep.Count(); i++)
+                {
+                    <p>step @(i+1)  - @sortResponce.ArrayStep.ElementAt(i)</p>
+                }
+            }
+        </div>
 
-<h1>Hello, world!</h1>
+        @if (arrayNumber.Count > 0)
+        {
+            <h3>@responce</h3>
+        }
 
-Welcome to your new app.
+    </div>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+
+    <div class="flex_right" style="width: 50%;">
+        <h6>
+            Введіть розмір матриці
+        </h6>
+        <div>
+            <input type="text" @bind="@n" title="N" style="width: 2rem; text-align: center;" />
+            <input type="text" @bind="@m" title="M" style="width: 2rem; text-align: center;" />
+            <button @onclick="(() => GenerateMatrix())">Згенерувати та виконити завдання</button>
+        </div>
+        <div>
+            @if (copy.Length > 0 && n > 0 && m > 0)
+            {
+                @for (int i = 0; i < n; i++)
+                {
+                    @for (int k = 0; k < m; k++)
+                    {
+                        <div class="flex_left">
+                            <span>@copy[i, k]&nbsp;&nbsp;</span>
+                        </div>
+                    }
+                    <br />
+                }
+            }
+        </div>
+        <br />
+        <div>
+            @if (buffernumberArray.Length > 0 && n > 0 && m > 0)
+            {
+                @for (int i = 0; i < n; i++)
+                {
+                    @for (int k = 0; k < m; k++)
+                    {
+                        <div class="flex_left">
+                            <span>@buffernumberArray[i, k]&nbsp;&nbsp;</span>
+                        </div>
+                    }
+                    <br />
+                }
+            }
+        </div>
+
+    </div>
+
+
+</div>
+
+
+@code{
+    string ArrayString = "";
+    List<double> arrayNumber = new();
+    string responce = "";
+    TimeSpan ExTime;
+    int n, m = 0;
+    double[,] numberArray = new double[0,0];
+    double[,] copy = new double[0, 0];
+    double[,] buffernumberArray = new double[0, 0];
+    SortResponce<double> sortResponce;
+
+    async Task Chache()
+    {
+        if (ArrayString.Replace(" ", "") != "")
+        {
+            arrayNumber.Clear();
+            responce = string.Empty;
+            string[] arrayString = ArrayString.Replace(" ", "").Replace(",", "&").Replace(".", ",").Split('&');
+            if (arrayString.Count() > 1) {
+                foreach (var item in arrayString)
+                {
+                    arrayNumber.Add(Convert.ToDouble(item));
+                }
+            }
+            else
+            {
+                arrayNumber.AddRange(GenerationArray(Convert.ToInt32(arrayString[0])));
+            }
+
+            sortResponce = await arrayNumber.Selection();
+            ExTime = sortResponce.ExecutionTime;
+            foreach (var item in sortResponce.Array)
+            {
+                responce += item + " ";
+            }
+        }
+    }
+
+    void GenerateMatrix()
+    {
+        if(n*m > 0)
+        {
+            Random rnd = new Random();
+            numberArray = new double[n,m];
+
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < m; j++)
+                {
+                    numberArray[i,j] = rnd.Next(0,100);
+                }
+            }
+            copy = numberArray.Clone() as double[,];
+            ReplaseMinElement();
+            buffernumberArray = Sort.SelectionSortMatrix(numberArray,n,m);
+        }
+    }
+
+    List<double> GenerationArray(int arrayCount)
+    {
+        List<double> array = new List<double>();
+        if(arrayCount > 0)
+        {
+            Random rnd = new Random();
+
+            for (int i = 0; i < arrayCount; i++)
+            {
+                double val = rnd.Next(0,100);
+                array.Add(val);
+            }
+        }
+        return array;
+    }
+
+
+
+    void ReplaseMinElement()
+    {
+        if (numberArray.Length > 0 && n * m > 0)
+        {
+            double min;
+            int minIndex;
+            for (int i = 0; i < n; i++)
+            {
+                min = numberArray[i, 0];
+                minIndex = 0;
+                for (int j = 1; j < m; j++)
+                {
+                    if (min > numberArray[i, j])
+                    {
+                        min = numberArray[i, j];
+                        minIndex = j;
+                    }
+                    if (j >= m - 1)
+                    {
+                        double temp = numberArray[i, minIndex];
+                        numberArray[i, minIndex] = Math.Round(1 / temp, 3);
+                    }
+                }
+            }
+        }
+    }
+
+    }
 

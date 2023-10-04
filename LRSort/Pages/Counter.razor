@@ -1,19 +1,211 @@
 ﻿@page "/counter"
+@using SelectionSort
+@using LRSort.Models
+<div class="flex_left" style="width: 50%;">
+    <div>
+        <input type="text" @bind="@ArrayString" />
+        <button @onclick="(async () => await Chache())">Sort</button>
+        <p>Time sort (Microseconds): @ExTime.Microseconds</p>
+    </div>
+    <div>
+        <h2>Step</h2>
+        @if (sortResponce != null && sortResponce.ArrayStep.Count() > 0)
+        {
+            @for (int i = 0; i < sortResponce.ArrayStep.Count(); i++)
+            {
+                <p>step @(i+1)  - @sortResponce.ArrayStep.ElementAt(i)</p>
+            }
+        }
+    </div>
 
-<PageTitle>Counter</PageTitle>
+    @if (arrayNumber.Count > 0)
+    {
+        <h3>@responce</h3>
+    }
 
-<h1>Counter</h1>
+</div>
 
-<p role="status">Current count: @currentCount</p>
+<div class="flex_right"  style="width: 50%;">
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    <div>
+        <span>Name</span><br />
+        <input type="text" @bind="Name"/><br/>
+        <span>Surname</span><br />
+        <input type="text" @bind="Surname"/><br/>
+        <span>GPA</span><br />
+        <input type="number" @bind="GPA"/><br/>
+        <button @onclick="(() => AddNewStudent())">Add student</button><br />
+    </div>
+    <button @onclick="(() => StudenSort())">Sort by Name</button>
+    <div>
+        <div class="flex_left" style="width: 50%;">
+            <h3>Students</h3>
+            <div>
+                @if (Students != null && Students.Count() > 0)
+                {
+                    @for (int i = 0; i < Students.Count(); i++)
+                    {
+                        <h5>@(i+1)  @Students[i].Surname @Students[i].Name: @Students[i].GPA</h5>
+                    }
+                }
+            </div>
+        </div>
+        <div class="flex_right" style="width: 50%;">
+            <h3>Sort Students</h3>
+            <div>
+                @if (SortStudents != null && SortStudents.Count() > 0)
+                {
+                    @for (int i = 0; i < SortStudents.Count(); i++)
+                    {
+                        <h5>@(i+1)  @SortStudents[i].Surname @SortStudents[i].Name: @SortStudents[i].GPA</h5>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+
+</div>
 
 @code {
-    private int currentCount = 0;
-
-    private void IncrementCount()
+    string ArrayString = "";
+    List<double> arrayNumber = new();
+    string responce = "";
+    TimeSpan ExTime;
+    string Name, Surname = "";
+    double GPA = 0;
+    SortResponce<double> sortResponce;
+    List<Student> Students = new()
     {
-        currentCount++;
+        new Student()
+        {
+            Name = "Дмитро",
+            Surname = "Дудченко",
+            GPA = 5
+        },
+        new Student()
+        {
+            Name = "Олена",
+            Surname = "Петренко",
+            GPA = 3.2
+        }
+        ,
+        new Student()
+        {
+            Name = "Сергій",
+            Surname = "Козак",
+            GPA = 2.8
+        }
+        ,
+        new Student()
+        {
+            Name = "Іван",
+            Surname = "Іваненко",
+            GPA = 4.4
+        }
+
+    };
+    List<Student> SortStudents = new();
+
+    void AddNewStudent()
+    {
+        if ((Name,Surname,GPA) != ("","",0))
+        {
+            Students.Add(new()
+            {
+                Name = Name,
+                Surname = Surname,
+                GPA = GPA
+
+            });
+        }
     }
+
+    async Task Chache()
+    {
+        if (ArrayString.Replace(" ", "") != "")
+        {
+            arrayNumber.Clear();
+            responce = string.Empty;
+            string[] arrayString = ArrayString.Replace(" ", "").Replace(",", "&").Replace(".", ",").Split('&');
+            if (arrayString.Count() > 1)
+            {
+                foreach (var item in arrayString)
+                {
+                    arrayNumber.Add(Convert.ToDouble(item));
+                }
+            }
+            else
+            {
+                arrayNumber.AddRange(GenerationArray(Convert.ToInt32(arrayString[0])));
+            }
+
+            sortResponce = await arrayNumber.Shell();
+            ExTime = sortResponce.ExecutionTime;
+            foreach (var item in sortResponce.Array)
+            {
+                responce += item + " ";
+            }
+        }
+    }
+
+    List<double> GenerationArray(int arrayCount)
+    {
+        List<double> array = new List<double>();
+        if (arrayCount > 0)
+        {
+            Random rnd = new Random();
+
+            for (int i = 0; i < arrayCount; i++)
+            {
+                double val = rnd.Next(0, 100);
+                array.Add(val);
+            }
+        }
+        return array;
+    }
+
+    async Task StudenSort()
+    {
+        SortStudents.Clear();
+        foreach (var student in Students)
+        {
+            if(student.GPA > 4)
+            {
+                SortStudents.Add(student);
+            }
+        }
+        await StudentShellSort(SortStudents);
+    }
+
+    private  async Task<List<Student>> StudentShellSort(List<Student> array)
+    {
+        //відстань між елементами, які порівнюються
+        var d = array.Count() / 2;
+        while (d >= 1)
+        {
+            for (var i = d; i < array.Count(); i++)
+            {
+                var j = i;
+                char a = array[j - d].Name[0];
+                char b = array[j].Name[0];
+                int indexChar1 = ((int)a == 'І' ? ((int)a) + 22 : a) ;
+                int indexChar2 = ((int)b == 'І' ? ((int)b) + 22 : b);
+                while ((j >= d) && (indexChar1 > indexChar2))
+                {
+                    ShellSort.Swap(ref array, j, j - d);
+                    j = j - d;
+                }
+            }
+
+            d = d / 2;
+        }
+
+        return array;
+    }
+
+
+
+
 }
 

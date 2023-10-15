@@ -6,14 +6,14 @@ namespace SelectionSort
 	{
 
 
-        public static async Task<SortResponce<double>> QuickSort(this List<double> array)
+        public static async Task<SortResponce<double>> QuickSortDouble(this List<double> array)
         {
             var sw = new Stopwatch();
             List<double> arrayClone = new();
             List<string> step = new();
             arrayClone.AddRange(array);
             sw.Start();
-            List<double> sortArray = await QuickSortD(array);
+            List<double> sortArray = QuickSort(array.ToArray()).ToList();
             sw.Stop();
             //if (array.Count() <= 100)
             //{
@@ -23,14 +23,16 @@ namespace SelectionSort
         }
 
 
-        private static void Swap<T>(ref List<T> array, int indexA, int indexB)
+        #region Algoritm
+        //метод для обміну елементів масиву
+        static void Swap(ref double x, ref double y)
         {
-            var temp = array[indexA];
-            array[indexA] = array[indexB];
-            array[indexB] = temp;
+            var t = x;
+            x = y;
+            y = t;
         }
-
-        private static int Partition(List<double> array, int minIndex, int maxIndex)
+        //метод повертає індекс опорного елементу
+        static int Partition(double[] array, int minIndex, int maxIndex)
         {
             var pivot = minIndex - 1;
             for (var i = minIndex; i < maxIndex; i++)
@@ -38,16 +40,16 @@ namespace SelectionSort
                 if (array[i] < array[maxIndex])
                 {
                     pivot++;
-                    Swap(ref array, pivot,i);
+                    Swap(ref array[pivot], ref array[i]);
                 }
             }
 
             pivot++;
-            Swap(ref array, pivot, minIndex);
+            Swap(ref array[pivot], ref array[maxIndex]);
             return pivot;
         }
-
-        private static List<double> QuickSort(List<double> array, int minIndex, int maxIndex)
+        //швидке сортування
+        static double[] QuickSort(double[] array, int minIndex, int maxIndex)
         {
             if (minIndex >= maxIndex)
             {
@@ -60,13 +62,11 @@ namespace SelectionSort
 
             return array;
         }
-
-        public static async Task<List<double>> QuickSortD(List<double> array)
+        static double[] QuickSort(double[] array)
         {
-            return QuickSort(array, 0, array.Count - 1);
+            return QuickSort(array, 0, array.Length - 1);
         }
-
-
+        #endregion
         private static async Task<List<string>> QuickSortStep(List<double> array, int minIndex, int maxIndex)
         {
 

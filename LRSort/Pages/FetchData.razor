@@ -1,6 +1,5 @@
 ﻿@page "/fetchdata"
 @using SelectionSort
-@using LRSort.Models
 
 
 
@@ -13,6 +12,7 @@
         </div>
         <div>
             <h2>Step</h2>
+            @First
             @if (sortResponce != null && sortResponce.ArrayStep.Count() > 0)
             {
                 @for (int i = 0; i < sortResponce.ArrayStep.Count(); i++)
@@ -32,7 +32,28 @@
 
     <div class="flex_right" style="width: 50%;">
 
+        <div>
+            <input type="text" @bind="@ArrayIndString" />
+            <button @onclick="(async () => await GenerationIndArray())">Sort</button>
+            <p>Time sort (Microseconds): @ExTimeInd.Microseconds</p>
+        </div>
+        <div>
+            <h2>Step</h2>
+            @FirstInd
+            @if (sortIndResponce != null && sortIndResponce.ArrayStep.Count() > 0)
+            {
+                @for (int i = 0; i < sortIndResponce.ArrayStep.Count(); i++)
+                {
+                    <p>step @(i+1)  - @sortIndResponce.ArrayStep.ElementAt(i)</p>
+                }
+            }
+        </div>
 
+
+        @if (arrayIndNumber.Count > 0)
+        {
+            <h3>@responceInd</h3>
+        }
 
     </div>
 
@@ -44,15 +65,21 @@
 
 
 @code {
+    const int NON_NEGATIVE_ELEMENT = -1;
     string ArrayString = "";
+    string ArrayIndString = "";
     List<double> arrayNumber = new();
+    List<double> arrayIndNumber = new();
     string responce = "";
+    string responceInd= "";
+    string FirstInd = "";
+    string First = "";
     TimeSpan ExTime;
+    TimeSpan ExTimeInd;
     int n, m = 0;
-    double[,] numberArray = new double[0, 0];
-    double[,] copy = new double[0, 0];
-    double[,] buffernumberArray = new double[0, 0];
+    List<double> indArray = new();
     SortResponce<double> sortResponce;
+    SortResponce<double> sortIndResponce;
 
     async Task Chache()
     {
@@ -70,10 +97,10 @@
             }
             else
             {
-                arrayNumber.AddRange(GenerationArray(Convert.ToInt32(arrayString[0])));
+                arrayNumber.AddRange(GenerationArray(Convert.ToInt32(arrayString[0]),0,100));
             }
-
-            sortResponce = await arrayNumber.QuickSort();
+            First = await Sort.ArrayToString<double>(arrayNumber);
+            sortResponce = await arrayNumber.QuickSortDouble();
             ExTime = sortResponce.ExecutionTime;
             foreach (var item in sortResponce.Array)
             {
@@ -82,8 +109,75 @@
         }
     }
 
+    async Task GenerationIndArray()
+    {
+        if (ArrayIndString.Replace(" ", "") != "")
+        {
+            arrayIndNumber.Clear();
+            responceInd = string.Empty;
+            string[] arrayString = ArrayIndString.Replace(" ", "").Replace(",", "&").Replace(".", ",").Split('&');
+            if (arrayString.Count() > 1)
+            {
+                foreach (var item in arrayString)
+                {
+                    arrayIndNumber.Add(Convert.ToDouble(item));
+                }
+            }
+            else
+            {
+                arrayIndNumber.AddRange(GenerationArray(Convert.ToInt32(arrayString[0]), -100, 100));
+            }
 
-    List<double> GenerationArray(int arrayCount)
+            FirstInd = await Sort.ArrayToString<double>(arrayIndNumber);
+            int[] indexs = MinNegativeIndexStartAndEnd(arrayIndNumber);
+            if (indexs[0] != NON_NEGATIVE_ELEMENT)
+            {
+                List<double> newList = arrayIndNumber.Skip(indexs[0]).Take(indexs[1] + 1).ToList();
+                sortIndResponce = await newList.QuickSortDouble();
+                ExTimeInd = sortIndResponce.ExecutionTime;
+                foreach (var item in sortIndResponce.Array)
+                {
+                    responceInd += item + " ";
+                }
+
+            }
+        }
+    }
+
+    int[] MinNegativeIndexStartAndEnd(List<double> array)
+    {
+        int MinIndexStart = NON_NEGATIVE_ELEMENT;
+        int MinIndexEnd = NON_NEGATIVE_ELEMENT;
+        for (int i = 0; i < array.Count; i++)
+        {
+            if (array[i] < 0 && MinIndexStart == NON_NEGATIVE_ELEMENT)
+            {
+                MinIndexStart = i;
+            }
+            if (array[array.Count - 1 - i] < 0 && MinIndexEnd == NON_NEGATIVE_ELEMENT)
+            {
+                MinIndexEnd = array.Count - 1 - i;
+            }
+            if(MinIndexStart != NON_NEGATIVE_ELEMENT && MinIndexEnd != NON_NEGATIVE_ELEMENT)
+            {
+                break;
+            }
+
+        }
+        if (MinIndexStart == NON_NEGATIVE_ELEMENT && MinIndexEnd == NON_NEGATIVE_ELEMENT)
+        {
+            return new int[] { NON_NEGATIVE_ELEMENT, NON_NEGATIVE_ELEMENT };
+        }
+        else
+        {
+            return new int[] { MinIndexStart, MinIndexEnd };
+        }
+
+    }
+
+
+
+    List<double> GenerationArray(int arrayCount,int start, int end)
     {
         List<double> array = new List<double>();
         if (arrayCount > 0)
@@ -92,12 +186,12 @@
 
             for (int i = 0; i < arrayCount; i++)
             {
-                double val = rnd.Next(0, 100);
+                double val = rnd.Next(start, end);
                 array.Add(val);
             }
         }
         return array;
     }
 
-}
+    }
 

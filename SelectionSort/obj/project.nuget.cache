@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ww5RpNVwsWduhd9pG3/sZ2lz6vd93SzlX5kLMbw9WVex3h4LeMRkhMCXN19qEFyLvnBhPQsFW/o0R1fuDq6xhg==",
+  "dgSpecHash": "bMrDT4hKyYPFTdazRUbZ8zH1B0RmtGQXULNdOLxhoZtvang2XVjcgPISL+DIbhu9kJ9BvoU0dp/DTlxofKzqiw==",
   "success": true,
-  "projectFilePath": "/Users/dudcenko/Projects/LRSort/SelectionSort/SelectionSort.csproj",
+  "projectFilePath": "C:\\Users\\mrdey\\Source\\Repos\\ADSLR\\SelectionSort\\SelectionSort.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

@@ -1,0 +1,192 @@
+﻿@page "/mergesort"
+@using SelectionSort
+@using LRSort.Models
+
+
+<div>
+    <div class="flex_left" style="width: 50%;">
+        <div>
+            <input type="text" @bind="@ArrayString" />
+            <button @onclick="(async () => await Chache())">Sort</button>
+        </div>
+
+
+        @if (arrayNumber.Count > 0)
+        {
+            <h3>@responce</h3>
+        }
+
+    </div>
+
+
+    <div class="flex_right" style="width: 50%;">
+        <div>
+            <span>Array1</span><br />
+            <input type="text" @bind="@Array1String" /><br />
+            <span>Array2</span><br />
+            <input type="text" @bind="@Array2String" /><br />
+            <button @onclick="(async () => await Indu())">Sort</button>
+        </div>
+
+        @if (arrayFinish.Count > 0)
+        {
+            <h3>@responce2</h3>
+        }
+
+    </div>
+
+
+</div>
+
+
+
+
+
+@code {
+    string ArrayString = "";
+
+    string Array1String = "";
+    string Array2String = "";
+
+    List<double> arrayNumber = new();
+
+    List<int> array1Number = new();
+    List<int> array2Number = new();
+
+    List<int> array1 = new();
+    List<int> array2 = new();
+    List<int> arrayFinish = new();
+
+    string responce = "";
+    string responce2 = "";
+    TimeSpan ExTime;
+    int n, m = 0;
+    double[,] numberArray = new double[0, 0];
+    double[,] copy = new double[0, 0];
+    double[,] buffernumberArray = new double[0, 0];
+    SortResponce<double> sortResponce = new();
+
+    async Task Chache()
+    {
+        if (ArrayString.Replace(" ", "") != "")
+        {
+            arrayNumber.Clear();
+            responce = string.Empty;
+            string[] arrayString = ArrayString.Replace(" ", "").Replace(",", "&").Replace(".", ",").Split('&');
+            if (arrayString.Count() > 1)
+            {
+                foreach (var item in arrayString)
+                {
+                    arrayNumber.Add(Convert.ToDouble(item));
+                }
+            }
+            else
+            {
+                arrayNumber.AddRange(GenerationArray(Convert.ToInt32(arrayString[0])));
+            }
+
+            double[] arraySort = arrayNumber.ToArray().SortMergeArray(0, arrayNumber.Count - 1);
+            ExTime = sortResponce.ExecutionTime;
+            foreach (var item in arraySort.ToList())
+            {
+                responce += item + " ";
+            }
+        }
+    }
+
+
+    async Task Indu()
+    {
+        if (Array1String.Replace(" ", "") != "" && Array2String.Replace(" ", "") != "")
+        {
+            array1Number.Clear();
+            array2Number.Clear();
+            responce2 = string.Empty;
+            string[] array1String = Array1String.Replace(" ", "").Replace(",", "&").Replace(".", ",").Split('&');
+            string[] array2String = Array2String.Replace(" ", "").Replace(",", "&").Replace(".", ",").Split('&');
+            if (array1String.Count() > 1)
+            {
+                foreach (var item in array1String)
+                {
+                    array1Number.Add(Convert.ToInt32(item));
+                }
+            }
+            if (array2String.Count() > 1)
+            {
+                foreach (var item in array2String)
+                {
+                    array2Number.Add(Convert.ToInt32(item));
+                }
+            }
+            else
+            {
+                array1Number.AddRange(GenerationArrayInt(Convert.ToInt32(array1String[0])));
+                array2Number.AddRange(GenerationArrayInt(Convert.ToInt32(array2String[0])));
+            }
+
+            arrayFinish = GenerNewArray(array1Number, array2Number);
+            int[] arraySort = arrayFinish.ToArray().SortMergeIntArray(0, arrayFinish.Count - 1);
+            foreach (var item in arraySort.ToList())
+            {
+                responce2 += item + " ";
+            }
+        }
+    }
+
+
+    private List<int> GenerNewArray(List<int> array1, List<int> array2)
+    {
+        List<int> endArray = new();
+
+        foreach (var item in array1)
+        {
+            if (item % 2 == 0)
+            {
+                endArray.Add(item);
+            }
+        }
+        foreach (var item in array2)
+        {
+            if (item % 2 == 0)
+            {
+                endArray.Add(item);
+            }
+        }
+        return endArray;
+
+    }
+
+
+
+    List<double> GenerationArray(int arrayCount)
+    {
+        List<double> array = new List<double>();
+        if (arrayCount > 0)
+        {
+            Random rnd = new Random();
+
+            for (int i = 0; i < arrayCount; i++)
+            {
+                double val = rnd.Next(0, 100);
+                array.Add(val);
+            }
+        }
+        return array;
+    }
+
+    List<int> GenerationArrayInt(int arrayCount)
+    {
+        List<int> array = new List<int>();
+        if (arrayCount > 0)
+        {
+            Random rnd = new Random();
+
+            for (int i = 0; i < arrayCount; i++)
+            {
+                int val = rnd.Next(0, 100);
+                array.Add(val);
+            }
+        }
+        return array;
+    }
+}
